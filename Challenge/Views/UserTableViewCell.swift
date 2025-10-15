@@ -52,18 +52,6 @@ class UserTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let ageLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .systemBlue
-        label.textAlignment = .center
-        label.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-        label.layer.cornerRadius = 8
-        label.clipsToBounds = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private let bookmarkButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "bookmark"), for: .normal)
@@ -102,7 +90,6 @@ class UserTableViewCell: UITableViewCell {
         
         contentView.addSubview(avatarImageView)
         contentView.addSubview(stackView)
-        contentView.addSubview(ageLabel)
         contentView.addSubview(bookmarkButton)
         
         stackView.addArrangedSubview(nameLabel)
@@ -125,13 +112,7 @@ class UserTableViewCell: UITableViewCell {
             // Stack View
             stackView.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 12),
             stackView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            stackView.trailingAnchor.constraint(equalTo: ageLabel.leadingAnchor, constant: -12),
-            
-            // Age Label
-            ageLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: -10),
-            ageLabel.trailingAnchor.constraint(equalTo: bookmarkButton.leadingAnchor, constant: -12),
-            ageLabel.widthAnchor.constraint(equalToConstant: 40),
-            ageLabel.heightAnchor.constraint(equalToConstant: 20),
+            stackView.trailingAnchor.constraint(equalTo: bookmarkButton.leadingAnchor, constant: -12),
             
             // Bookmark Button
             bookmarkButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -151,7 +132,6 @@ class UserTableViewCell: UITableViewCell {
         nameLabel.text = user.fullName
         emailLabel.text = user.email
         locationLabel.text = "\(user.location.city), \(user.location.country)"
-        ageLabel.text = "\(user.age)"
         
         // Update bookmark button state
         bookmarkButton.isSelected = BookmarkManager.shared.isBookmarked(user)
@@ -206,7 +186,6 @@ class UserTableViewCell: UITableViewCell {
         nameLabel.text = nil
         emailLabel.text = nil
         locationLabel.text = nil
-        ageLabel.text = nil
         bookmarkButton.isSelected = false
         user = nil
     }
