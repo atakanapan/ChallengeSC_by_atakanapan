@@ -10,6 +10,7 @@ import UIKit
 class BookmarksViewController: UIViewController {
     
     // MARK: - Properties
+    weak var coordinator: BookmarksCoordinator?
     private var viewModel = BookmarksViewModel()
     
     // MARK: - UI Elements
@@ -185,8 +186,7 @@ class BookmarksViewController: UIViewController {
     
     // MARK: - Navigation
     private func showUserDetail(for user: User) {
-        let detailVC = UserDetailViewController(user: user)
-        navigationController?.pushViewController(detailVC, animated: true)
+        coordinator?.showUserDetail(for: user)
     }
     
     private func removeBookmark(at indexPath: IndexPath) {

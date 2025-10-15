@@ -10,6 +10,7 @@ import UIKit
 class UserDetailViewController: UIViewController {
     
     // MARK: - Properties
+    weak var coordinator: UserDetailCoordinator?
     private let viewModel: UserDetailViewModel
     
     // MARK: - UI Elements
@@ -344,13 +345,7 @@ class UserDetailViewController: UIViewController {
     
     @objc private func shareUser() {
         let shareText = viewModel.getShareText()
-        let activityVC = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        
-        if let popover = activityVC.popoverPresentationController {
-            popover.barButtonItem = navigationItem.rightBarButtonItem
-        }
-        
-        present(activityVC, animated: true)
+        coordinator?.presentShareActivity(with: [shareText], from: navigationItem.rightBarButtonItem?.customView)
     }
     
     @objc private func bookmarkDidChange(_ notification: Notification) {

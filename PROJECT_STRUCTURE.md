@@ -12,17 +12,27 @@ Challenge/
 │   ├── APIService.swift                    # Network layer for randomuser.me API
 │   ├── BookmarkManager.swift               # Local bookmark management
 │   └── ImageLoadingService.swift           # Image downloading and caching (included in APIService.swift)
+├── ViewModels/
+│   ├── UsersListViewModel.swift            # Business logic for users list and search
+│   ├── UserDetailViewModel.swift           # User detail display logic and formatting
+│   └── BookmarksViewModel.swift            # Bookmark management logic
 ├── Controllers/
-│   ├── MainTabBarController.swift          # Root tab bar controller
-│   ├── UsersListViewController.swift       # Users list with search and infinite scroll
-│   ├── UserDetailViewController.swift      # Detailed user profile view
-│   └── BookmarksViewController.swift       # Bookmarks management
+│   ├── UsersListViewController.swift       # Users list presentation (UI only)
+│   ├── UserDetailViewController.swift      # User detail presentation (UI only)
+│   └── BookmarksViewController.swift       # Bookmarks presentation (UI only)
+├── Coordinators/
+│   ├── Coordinator.swift                   # Base coordinator protocol
+│   ├── AppCoordinator.swift                # Root application coordinator
+│   ├── TabBarCoordinator.swift             # Main tab bar navigation
+│   ├── UsersListCoordinator.swift          # Users list navigation flow
+│   ├── BookmarksCoordinator.swift          # Bookmarks navigation flow
+│   └── UserDetailCoordinator.swift         # User detail navigation
 ├── Views/
 │   └── UserTableViewCell.swift             # Custom table view cell
 ├── Extensions/
 │   └── UIView+Extensions.swift             # Utility extensions
 ├── AppDelegate.swift                       # App delegate with appearance configuration
-├── SceneDelegate.swift                     # Scene delegate with tab bar setup
+├── SceneDelegate.swift                     # Scene delegate with coordinator setup
 ├── Info.plist                             # App configuration
 └── README.md                              # Project documentation
 ```
@@ -112,12 +122,18 @@ Challenge/
 
 ## Architecture Highlights
 
-- **Separation of Concerns**: Clear separation between models, services, and controllers
-- **Delegate Pattern**: Used for cell interactions
-- **Notification Pattern**: Used for bookmark updates
+- **MVVM-C Pattern**: Complete Model-View-ViewModel-Coordinator implementation
+- **Separation of Concerns**: Clear separation between models, views, view models, and coordinators
+- **Navigation Logic**: Coordinators handle all navigation flows and dependencies
+- **Business Logic**: ViewModels manage data processing and business rules
+- **Presentation Logic**: View Controllers focus solely on UI presentation
+- **Delegate Pattern**: Used for communication between layers
+- **Notification Pattern**: Used for cross-app updates (bookmarks)
 - **Service Layer**: Dedicated services for networking and storage
+- **Coordinator Pattern**: Centralized navigation management
+- **Dependency Injection**: Clean dependency management through coordinators
 - **Error Handling**: Comprehensive error management throughout
 - **Reusable Components**: Custom cells and extensions
 - **Clean Code**: Well-documented and maintainable codebase
 
-This implementation provides a complete, production-ready iOS application that fulfills all the technical challenge requirements while demonstrating best practices in iOS development.
+This implementation provides a complete, production-ready iOS application that demonstrates **enterprise-level architecture** with MVVM-C pattern, showcasing advanced iOS development skills and best practices.

@@ -10,6 +10,7 @@ import UIKit
 class UsersListViewController: UIViewController {
     
     // MARK: - Properties
+    weak var coordinator: UsersListCoordinator?
     private var viewModel = UsersListViewModel()
     
     // MARK: - UI Elements
@@ -163,8 +164,7 @@ class UsersListViewController: UIViewController {
     
     // MARK: - Navigation
     private func showUserDetail(for user: User) {
-        let detailVC = UserDetailViewController(user: user)
-        navigationController?.pushViewController(detailVC, animated: true)
+        coordinator?.showUserDetail(for: user)
     }
 }
 

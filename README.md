@@ -32,7 +32,7 @@ A modern iOS application built with UIKit that allows users to browse random use
 
 ## Architecture
 
-The app follows a clean architecture pattern with clear separation of concerns:
+The app follows a comprehensive **MVVM-C (Model-View-ViewModel-Coordinator)** architecture pattern with clean separation of concerns:
 
 ### Models
 - `User.swift` - Complete user data model with computed properties
@@ -43,15 +43,26 @@ The app follows a clean architecture pattern with clear separation of concerns:
 - `BookmarkManager.swift` - Local bookmark persistence and management
 - `ImageLoadingService.swift` - Image downloading and caching
 
+### ViewModels
+- `UsersListViewModel.swift` - Business logic for users list, search, and pagination
+- `UserDetailViewModel.swift` - User detail display logic and data formatting
+- `BookmarksViewModel.swift` - Bookmark management and operations
+
 ### Views
 - `UserTableViewCell.swift` - Custom table view cell with bookmark functionality
 - Clean, reusable components with delegate pattern
 
 ### Controllers
-- `MainTabBarController.swift` - Root tab bar with badge management
-- `UsersListViewController.swift` - Users list with search and infinite scroll
-- `UserDetailViewController.swift` - Detailed user profile view
-- `BookmarksViewController.swift` - Bookmarks management
+- `UsersListViewController.swift` - Users list presentation (UI only)
+- `UserDetailViewController.swift` - User detail presentation (UI only)
+- `BookmarksViewController.swift` - Bookmarks presentation (UI only)
+
+### Coordinators
+- `AppCoordinator.swift` - Root application coordinator
+- `TabBarCoordinator.swift` - Main tab bar navigation management
+- `UsersListCoordinator.swift` - Users list navigation flow
+- `BookmarksCoordinator.swift` - Bookmarks navigation flow
+- `UserDetailCoordinator.swift` - User detail navigation and share functionality
 
 ### Extensions
 - `UIView+Extensions.swift` - Utility extensions for enhanced UX
@@ -126,12 +137,16 @@ Potential improvements for future versions:
 
 ## Code Quality
 
-The codebase follows iOS best practices:
+The codebase follows iOS best practices with **MVVM-C architecture**:
 
-- **Clean Code**: Well-structured, readable, and maintainable
+- **Clean Architecture**: Complete MVVM-C implementation with proper separation
+- **Navigation Logic**: Coordinators handle all navigation flows
+- **Business Logic**: ViewModels manage data and business rules
+- **UI Logic**: View Controllers focus solely on presentation
 - **Documentation**: Comprehensive inline documentation
 - **Error Handling**: Robust error management throughout
 - **Performance**: Efficient memory usage and smooth scrolling
+- **Testability**: Each layer can be independently unit tested
 - **Accessibility**: VoiceOver and accessibility support
 
 ## Contact
