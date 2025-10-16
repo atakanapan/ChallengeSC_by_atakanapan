@@ -7,12 +7,7 @@
 
 import UIKit
 
-protocol TabBarCoordinatorDelegate: AnyObject {
-    func tabBarCoordinatorDidFinish(_ coordinator: TabBarCoordinator)
-}
-
 class TabBarCoordinator: NSObject, Coordinator {
-    weak var delegate: TabBarCoordinatorDelegate?
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     
