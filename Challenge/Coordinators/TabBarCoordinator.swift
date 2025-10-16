@@ -26,8 +26,6 @@ class TabBarCoordinator: NSObject, Coordinator {
     }
     
     private func setupTabBar() {
-        tabBarController.delegate = self
-        
         // Configure tab bar appearance
         tabBarController.tabBar.tintColor = .systemBlue
         tabBarController.tabBar.unselectedItemTintColor = .systemGray
@@ -46,8 +44,7 @@ class TabBarCoordinator: NSObject, Coordinator {
         // Users List Coordinator
         let usersListNavController = UINavigationController()
         usersListCoordinator = UsersListCoordinator(navigationController: usersListNavController)
-        usersListCoordinator?.delegate = self
-        
+
         usersListNavController.tabBarItem = UITabBarItem(
             title: "Users",
             image: UIImage(systemName: "person.2"),
@@ -57,7 +54,6 @@ class TabBarCoordinator: NSObject, Coordinator {
         // Bookmarks Coordinator
         let bookmarksNavController = UINavigationController()
         bookmarksCoordinator = BookmarksCoordinator(navigationController: bookmarksNavController)
-        bookmarksCoordinator?.delegate = self
         
         bookmarksNavController.tabBarItem = UITabBarItem(
             title: "Bookmarks",
