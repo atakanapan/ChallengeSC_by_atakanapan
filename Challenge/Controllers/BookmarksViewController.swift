@@ -189,22 +189,7 @@ class BookmarksViewController: UIViewController {
         coordinator?.showUserDetail(for: user)
     }
     
-    private func removeBookmark(at indexPath: IndexPath) {
-        let message = viewModel.getRemoveConfirmationMessage(at: indexPath.row)
-        
-        let alert = UIAlertController(
-            title: "Remove Bookmark",
-            message: message,
-            preferredStyle: .alert
-        )
-        
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Remove", style: .destructive) { _ in
-            self.viewModel.removeBookmark(at: indexPath.row)
-        })
-        
-        present(alert, animated: true)
-    }
+
 }
 
 // MARK: - UITableViewDataSource
@@ -226,15 +211,7 @@ extension BookmarksViewController: UITableViewDataSource {
         return cell
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            removeBookmark(at: indexPath)
-        }
-    }
-    
-    func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "Remove"
-    }
+
 }
 
 // MARK: - UITableViewDelegate
@@ -247,16 +224,7 @@ extension BookmarksViewController: UITableViewDelegate {
         }
     }
     
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let removeAction = UIContextualAction(style: .destructive, title: "Remove") { [weak self] _, _, completion in
-            self?.removeBookmark(at: indexPath)
-            completion(true)
-        }
-        
-        removeAction.image = UIImage(systemName: "trash")
-        
-        return UISwipeActionsConfiguration(actions: [removeAction])
-    }
+
 }
 
 // MARK: - UserTableViewCellDelegate
