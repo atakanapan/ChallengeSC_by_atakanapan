@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UIKit
 
 // MARK: - NetworkError
 enum NetworkError: Error, LocalizedError {
@@ -95,72 +94,6 @@ class APIService {
                     print("❌ Decoding error: \(error)")
                     completion(.failure(.decodingError(error)))
                 }
-            }
-        }.resume()
-    }
-    
-    // MARK: - Search Users
-    func searchUsers(query: String, page: Int, results: Int = 25, completion: @escaping (Result<[User], NetworkError>) -> Void) {
-        // For search, we'll fetch users and filter locally since the API doesn't support search directly
-        fetchUsers(page: page, results: results) { result in
-            switch result {
-            case .success(let response):
-                let filteredUsers = response.results.filter { user in
-                    let searchText = query.lowercased()
-                    return user.fullName.lowercased().contains(searchText) ||
-                           user.email.lowercased().contains(searchText) ||
-                           user.location.city.lowercased().contains(searchText) ||
-                           user.location.country.lowercased().contains(searchText)
-                }
-                completion(.success(filteredUsers))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-}
-
-// MARK: - Image Loading Service
-class ImageLoadingService {
-    static let shared = ImageLoadingService()
-    
-    private let cache = NSCache<NSString, UIImage>()
-    private let session: URLSession
-    
-    private init() {
-        cache.countLimit = 100
-        cache.totalCostLimit = 1024 * 1024 * 100 // 100 MB
-        
-        let configuration = URLSessionConfiguration.default
-        configuration.timeoutIntervalForRequest = 30
-        self.session = URLSession(configuration: configuration)
-    }
-    
-    func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        let cacheKey = NSString(string: urlString)
-        
-        // Check cache first
-        if let cachedImage = cache.object(forKey: cacheKey) {
-            completion(cachedImage)
-            return
-        }
-        
-        guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
-        }
-        
-        session.dataTask(with: url) { [weak self] data, response, error in
-            DispatchQueue.main.async {
-                guard let data = data,
-                      let image = UIImage(data: data) else {
-                    completion(nil)
-                    return
-                }
-                
-                // Cache the image
-                self?.cache.setObject(image, forKey: cacheKey)
-                completion(image)
             }
         }.resume()
     }
