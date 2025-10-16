@@ -8,10 +8,11 @@
 import UIKit
 
 class TabBarCoordinator: NSObject, Coordinator {
-    var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     
     private(set) var tabBarController: UITabBarController
+    private var usersListCoordinator: UsersListCoordinator?
+    private var bookmarksCoordinator: BookmarksCoordinator?
     
     override init() {
         self.navigationController = UINavigationController()
@@ -44,9 +45,8 @@ class TabBarCoordinator: NSObject, Coordinator {
     private func setupCoordinators() {
         // Users List Coordinator
         let usersListNavController = UINavigationController()
-        let usersListCoordinator = UsersListCoordinator(navigationController: usersListNavController)
-        usersListCoordinator.delegate = self
-        addChildCoordinator(usersListCoordinator)
+        usersListCoordinator = UsersListCoordinator(navigationController: usersListNavController)
+        usersListCoordinator?.delegate = self
         
         usersListNavController.tabBarItem = UITabBarItem(
             title: "Users",
@@ -56,9 +56,8 @@ class TabBarCoordinator: NSObject, Coordinator {
         
         // Bookmarks Coordinator
         let bookmarksNavController = UINavigationController()
-        let bookmarksCoordinator = BookmarksCoordinator(navigationController: bookmarksNavController)
-        bookmarksCoordinator.delegate = self
-        addChildCoordinator(bookmarksCoordinator)
+        bookmarksCoordinator = BookmarksCoordinator(navigationController: bookmarksNavController)
+        bookmarksCoordinator?.delegate = self
         
         bookmarksNavController.tabBarItem = UITabBarItem(
             title: "Bookmarks",
@@ -70,8 +69,8 @@ class TabBarCoordinator: NSObject, Coordinator {
         tabBarController.viewControllers = [usersListNavController, bookmarksNavController]
         
         // Start child coordinators
-        usersListCoordinator.start()
-        bookmarksCoordinator.start()
+        usersListCoordinator?.start()
+        bookmarksCoordinator?.start()
         
         // Setup bookmark badge observer
         setupBookmarkBadgeObserver()
@@ -106,25 +105,5 @@ class TabBarCoordinator: NSObject, Coordinator {
     
     deinit {
         NotificationCenter.default.removeObserver(self)
-    }
-}
-
-// MARK: - UITabBarControllerDelegate
-extension TabBarCoordinator: UITabBarControllerDelegate {
-    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        // Handle tab selection if needed
-    }
-}
-
-// MARK: - Child Coordinator Delegates
-extension TabBarCoordinator: UsersListCoordinatorDelegate {
-    func usersListCoordinatorDidFinish(_ coordinator: UsersListCoordinator) {
-        removeChildCoordinator(coordinator)
-    }
-}
-
-extension TabBarCoordinator: BookmarksCoordinatorDelegate {
-    func bookmarksCoordinatorDidFinish(_ coordinator: BookmarksCoordinator) {
-        removeChildCoordinator(coordinator)
     }
 }

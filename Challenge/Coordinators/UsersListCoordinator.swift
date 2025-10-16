@@ -7,14 +7,9 @@
 
 import UIKit
 
-protocol UsersListCoordinatorDelegate: AnyObject {
-    func usersListCoordinatorDidFinish(_ coordinator: UsersListCoordinator)
-}
-
 class UsersListCoordinator: Coordinator {
-    weak var delegate: UsersListCoordinatorDelegate?
-    var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
+    private var userDetailCoordinator: UserDetailCoordinator?
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
@@ -31,19 +26,18 @@ class UsersListCoordinator: Coordinator {
     }
     
     func showUserDetail(for user: User) {
-        let userDetailCoordinator = UserDetailCoordinator(
+        userDetailCoordinator = UserDetailCoordinator(
             navigationController: navigationController,
             user: user
         )
-        userDetailCoordinator.delegate = self
-        addChildCoordinator(userDetailCoordinator)
-        userDetailCoordinator.start()
+        userDetailCoordinator?.delegate = self
+        userDetailCoordinator?.start()
     }
 }
 
 // MARK: - UserDetailCoordinatorDelegate
 extension UsersListCoordinator: UserDetailCoordinatorDelegate {
     func userDetailCoordinatorDidFinish(_ coordinator: UserDetailCoordinator) {
-        removeChildCoordinator(coordinator)
+        userDetailCoordinator = nil
     }
 }

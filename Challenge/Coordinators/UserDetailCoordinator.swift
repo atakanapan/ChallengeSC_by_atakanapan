@@ -13,7 +13,6 @@ protocol UserDetailCoordinatorDelegate: AnyObject {
 
 class UserDetailCoordinator: Coordinator {
     weak var delegate: UserDetailCoordinatorDelegate?
-    var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     
     private let user: User
