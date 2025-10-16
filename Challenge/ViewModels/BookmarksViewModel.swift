@@ -39,12 +39,7 @@ class BookmarksViewModel {
     
     // MARK: - Initialization
     init() {
-        setupNotifications()
         loadBookmarks()
-    }
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Public Methods
@@ -99,21 +94,5 @@ class BookmarksViewModel {
             title: "No Bookmarks Yet",
             subtitle: "Start bookmarking users to see them here"
         )
-    }
-    
-    // MARK: - Private Methods
-    
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(bookmarkDidChange),
-            name: BookmarkManager.bookmarkDidChangeNotification,
-            object: nil
-        )
-    }
-    
-    @objc private func bookmarkDidChange(_ notification: Notification) {
-        // Reload bookmarks whenever they change
-        loadBookmarks()
     }
 }

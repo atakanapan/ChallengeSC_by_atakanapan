@@ -64,6 +64,7 @@ class BookmarksViewController: UIViewController {
         setupViewModel()
         setupUI()
         setupTableView()
+        setupNotifications()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -72,7 +73,7 @@ class BookmarksViewController: UIViewController {
     }
     
     deinit {
-        // ViewModel handles its own cleanup
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup
@@ -154,6 +155,15 @@ class BookmarksViewController: UIViewController {
         tableView.estimatedRowHeight = 80
     }
     
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(bookmarkDidChange),
+            name: BookmarkManager.bookmarkDidChangeNotification,
+            object: nil
+        )
+    }
+    
     // MARK: - UI Updates
     private func updateUI() {
         DispatchQueue.main.async {
@@ -182,6 +192,13 @@ class BookmarksViewController: UIViewController {
         })
         
         present(alert, animated: true)
+    }
+    
+    @objc private func bookmarkDidChange(_ notification: Notification) {
+        DispatchQueue.main.async {
+            // Reload bookmarks data and update UI
+            self.viewModel.loadBookmarks()
+        }
     }
     
     // MARK: - Navigation

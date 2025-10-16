@@ -68,11 +68,12 @@ class UsersListViewController: UIViewController {
         setupTableView()
         setupSearchController()
         setupRefreshControl()
+        setupNotifications()
         viewModel.loadUsers()
     }
     
     deinit {
-        // ViewModel handles its own cleanup
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup
@@ -145,9 +146,35 @@ class UsersListViewController: UIViewController {
         tableView.refreshControl = refreshControl
     }
     
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(bookmarkDidChange),
+            name: BookmarkManager.bookmarkDidChangeNotification,
+            object: nil
+        )
+    }
+    
     // MARK: - Data Loading
     @objc private func handleRefresh() {
         viewModel.refreshUsers()
+    }
+    
+    @objc private func bookmarkDidChange(_ notification: Notification) {
+        DispatchQueue.main.async {
+            // Update visible cells to reflect bookmark changes
+            self.updateVisibleCells()
+        }
+    }
+    
+    private func updateVisibleCells() {
+        for cell in tableView.visibleCells {
+            guard let userCell = cell as? UserTableViewCell,
+                  let indexPath = tableView.indexPath(for: cell),
+                  let user = viewModel.user(at: indexPath.row) else { continue }
+            
+            userCell.configure(with: user)
+        }
     }
     
     // MARK: - UI Updates
