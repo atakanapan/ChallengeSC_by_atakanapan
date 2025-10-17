@@ -1,10 +1,3 @@
-//
-//  ImageLoadingService.swift
-//  Challenge
-//
-//  Created by Taras Nikulin on 16/10/2025.
-//
-
 import Foundation
 import UIKit
 
