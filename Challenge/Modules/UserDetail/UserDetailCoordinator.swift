@@ -1,9 +1,11 @@
 import UIKit
 
+@MainActor
 protocol UserDetailCoordinatorDelegate: AnyObject {
     func userDetailCoordinatorDidFinish(_ coordinator: UserDetailCoordinator)
 }
 
+@MainActor
 class UserDetailCoordinator: Coordinator {
     weak var delegate: UserDetailCoordinatorDelegate?
     var navigationController: UINavigationController

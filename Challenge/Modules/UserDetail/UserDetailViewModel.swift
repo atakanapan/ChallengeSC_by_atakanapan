@@ -6,49 +6,45 @@ protocol UserDetailViewModelDelegate: AnyObject {
     func didLoadProfileImage(_ image: UIImage)
 }
 
-class UserDetailViewModel {
-    
+@MainActor
+final class UserDetailViewModel {
+
     // MARK: - Properties
     weak var delegate: UserDetailViewModelDelegate?
-    
+
     private(set) var user: UserEntity
     private let imageLoadingService = ImageLoadingService.shared
     private let bookmarkManager = BookmarkManager.shared
-    
-    // MARK: - Initialization
+
+    private var bookmarkObserver: NSObjectProtocol?
+
+    // MARK: - Init / Deinit
     init(user: UserEntity) {
         self.user = user
         setupNotifications()
     }
-    
+
     deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    // MARK: - Public Methods
-    
-    /// Get user's display name
-    var displayName: String {
-        return user.fullName
-    }
-    
-    /// Get user's age and location string
-    var ageLocationText: String {
-        return "\(user.age) years old • \(user.location.city), \(user.location.country)"
-    }
-    
-    /// Get bookmark button title and style
-    var bookmarkButtonConfiguration: (title: String, backgroundColor: UIColor) {
-        if isBookmarked {
-            return ("Remove Bookmark", .systemRed)
-        } else {
-            return ("Add Bookmark", .systemBlue)
+        if let token = bookmarkObserver {
+            NotificationCenter.default.removeObserver(token)
         }
+    }
+
+    // MARK: - Public API
+
+    var displayName: String { user.fullName }
+
+    var ageLocationText: String {
+        "\(user.age) years old • \(user.location.city), \(user.location.country)"
+    }
+
+    var bookmarkButtonConfiguration: (title: String, backgroundColor: UIColor) {
+        isBookmarked ? ("Remove Bookmark", .systemRed) : ("Add Bookmark", .systemBlue)
     }
     
     /// Check if user is currently bookmarked
     var isBookmarked: Bool {
-        return bookmarkManager.isBookmarked(user)
+        bookmarkManager.isBookmarked(user)
     }
     
     /// Get placeholder image with user initials
@@ -62,9 +58,8 @@ class UserDetailViewModel {
     /// Load profile image
     func loadProfileImage() {
         imageLoadingService.loadImage(from: user.picture.large) { [weak self] image in
-            if let image = image {
-                self?.delegate?.didLoadProfileImage(image)
-            }
+            guard let self, let image else { return }
+            self.delegate?.didLoadProfileImage(image)
         }
     }
     
@@ -75,7 +70,7 @@ class UserDetailViewModel {
     
     /// Get share text for the user
     func getShareText() -> String {
-        return "Check out \(user.fullName) from \(user.location.city), \(user.location.country)!"
+        "Check out \(user.fullName) from \(user.location.city), \(user.location.country)!"
     }
     
     // MARK: - Contact Information
@@ -119,26 +114,38 @@ class UserDetailViewModel {
     // MARK: - Private Methods
     
     private func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(bookmarkDidChange),
-            name: BookmarkManager.bookmarkDidChangeNotification,
-            object: nil
-        )
-    }
-    
-    @objc private func bookmarkDidChange(_ notification: Notification) {
-        // Check if the notification is for this specific user
-        if let userInfo = notification.userInfo,
-           let notificationUser = userInfo["user"] as? UserEntity,
-           notificationUser.uniqueID == user.uniqueID {
-            delegate?.didUpdateBookmarkStatus()
-        } else if notification.userInfo?["action"] as? String == "cleared" {
-            // Handle clear all bookmarks
-            delegate?.didUpdateBookmarkStatus()
+        // The closure here is @Sendable. Don’t touch @MainActor state inside it directly.
+        bookmarkObserver = NotificationCenter.default.addObserver(
+            forName: BookmarkManager.bookmarkDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            // Hop to the main actor before using self / delegate.
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.handleBookmarkChange(notification)
+            }
         }
     }
     
+    @MainActor
+    private func handleBookmarkChange(_ notification: Notification) {
+        if let info = notification.userInfo,
+           let action = info["action"] as? String {
+            if action == "cleared" {
+                delegate?.didUpdateBookmarkStatus()
+                return
+            }
+            if let changedUser = info["user"] as? UserEntity,
+               changedUser.uniqueID == user.uniqueID {
+                delegate?.didUpdateBookmarkStatus()
+            }
+        } else {
+            delegate?.didUpdateBookmarkStatus()
+        }
+    }
+
+    // MARK: - Helpers
     private func formatDate(_ dateString: String) -> String {
         let formatter = ISO8601DateFormatter()
         if let date = formatter.date(from: dateString) {

@@ -1,5 +1,6 @@
 import Foundation
 
+// MARK: - UsersListViewModelDelegate
 protocol UsersListViewModelDelegate: AnyObject {
     func didUpdateUsers()
     func didUpdateSearchResults()
@@ -8,6 +9,8 @@ protocol UsersListViewModelDelegate: AnyObject {
     func didFinishLoading()
 }
 
+// MARK: - UsersListViewModel
+@MainActor
 class UsersListViewModel {
     
     // MARK: - Properties
@@ -25,18 +28,25 @@ class UsersListViewModel {
     
     private let apiService = APIService.shared
     
+    /// Use DI to avoid touching a main-actor singleton in a nonisolated place.
+    private let bookmarkManager: BookmarkManager
+
+    // MARK: - Initialization
+
+    /// Designated initializer (injectable for tests).
+    init(bookmarkManager: BookmarkManager) {
+        self.bookmarkManager = bookmarkManager
+    }
+
+    /// Convenience initializer that safely accesses `.shared` on the main actor.
+    convenience init() {
+        self.init(bookmarkManager: .shared)
+    }
+    
     // MARK: - Computed Properties
-    var currentUsers: [UserEntity] {
-        return isSearching ? filteredUsers : users
-    }
-    
-    var isEmpty: Bool {
-        return currentUsers.isEmpty
-    }
-    
-    var userCount: Int {
-        return currentUsers.count
-    }
+    var currentUsers: [UserEntity] { isSearching ? filteredUsers : users }
+    var isEmpty: Bool { currentUsers.isEmpty }
+    var userCount: Int { currentUsers.count }
     
     // MARK: - Public Methods
     
@@ -47,9 +57,10 @@ class UsersListViewModel {
         isLoading = true
         delegate?.didStartLoading()
         
+        // NOTE: Do NOT put @MainActor here together with a capture list.
+        // Accessing `self` (a @MainActor type) inside the Task will hop to main automatically.
         Task { [weak self] in
-            guard let self = self else { return }
-            
+            guard let self else { return }
             do {
                 let response = try await self.apiService.fetchUsers(
                     page: self.currentPage,
@@ -57,7 +68,7 @@ class UsersListViewModel {
                     seed: self.apiSeed
                 )
                 
-                print("📥 ViewModel received \(response.results.count) users (page: \(self.currentPage))")
+                AppLogger.log("📥 ViewModel received \(response.results.count) users (page: \(self.currentPage))")
                 
                 if self.apiSeed == nil {
                     self.apiSeed = response.info.seed
@@ -77,7 +88,6 @@ class UsersListViewModel {
                 } else {
                     self.delegate?.didUpdateUsers()
                 }
-                
             } catch let error as NetworkError {
                 self.delegate?.didReceiveError(error)
             }
@@ -116,12 +126,12 @@ class UsersListViewModel {
         isSearching = !searchText.isEmpty
         
         if isSearching {
+            let query = searchText.lowercased()
             filteredUsers = users.filter { user in
-                let query = searchText.lowercased()
-                return user.fullName.lowercased().contains(query) ||
-                       user.email.lowercased().contains(query) ||
-                       user.location.city.lowercased().contains(query) ||
-                       user.location.country.lowercased().contains(query)
+                user.fullName.lowercased().contains(query) ||
+                user.email.lowercased().contains(query) ||
+                user.location.city.lowercased().contains(query) ||
+                user.location.country.lowercased().contains(query)
             }
             delegate?.didUpdateSearchResults()
         } else {
@@ -148,19 +158,18 @@ class UsersListViewModel {
     /// Toggle bookmark for user at index
     func toggleBookmark(at index: Int) {
         guard let user = user(at: index) else { return }
-        BookmarkManager.shared.toggleBookmark(user)
+        bookmarkManager.toggleBookmark(user)
     }
     
     /// Check if user at index is bookmarked
     func isBookmarked(at index: Int) -> Bool {
         guard let user = user(at: index) else { return false }
-        return BookmarkManager.shared.isBookmarked(user)
+        return bookmarkManager.isBookmarked(user)
     }
 }
 
 // MARK: - Helper Extensions
 extension UsersListViewModel {
-    
     /// Get empty state message based on current state
     func getEmptyStateMessage() -> (title: String, subtitle: String) {
         if isSearching {

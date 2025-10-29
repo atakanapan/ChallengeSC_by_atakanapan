@@ -10,6 +10,9 @@ final class URLSessionHTTPClient: HTTPClient {
     private let session: URLSession
     
     init(configuration: URLSessionConfiguration = .default) {
+        configuration.waitsForConnectivity = true
+        configuration.allowsConstrainedNetworkAccess = true
+        configuration.allowsExpensiveNetworkAccess = true
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
         self.session = URLSession(configuration: configuration)

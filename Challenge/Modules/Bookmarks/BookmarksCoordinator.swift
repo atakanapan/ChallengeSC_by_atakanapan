@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 class BookmarksCoordinator: Coordinator {
     var navigationController: UINavigationController
     private var userDetailCoordinator: UserDetailCoordinator?

@@ -28,19 +28,19 @@ final class APIService {
         let endpoint = RandomUserEndpoint(page: page, results: results, seed: seed)
         let url = try endpoint.url()
         
-        print("🌐 Fetching users from: \(url.absoluteString)")
+        AppLogger.log("🌐 Fetching users from: \(url.absoluteString)")
         
         do {
             let (data, response) = try await httpClient.data(from: url)
             
             if let httpResponse = response as? HTTPURLResponse,
                !(200...299).contains(httpResponse.statusCode) {
-                print("❌ HTTP error: \(httpResponse.statusCode)")
+                AppLogger.log("❌ HTTP error: \(httpResponse.statusCode)")
                 throw NetworkError.httpError(httpResponse.statusCode)
             }
             
             let decoded = try JSONDecoder().decode(RandomUserResponse.self, from: data)
-            print("✅ Successfully fetched \(decoded.results.count) users (page: \(page))")
+            AppLogger.log("✅ Successfully fetched \(decoded.results.count) users (page: \(page))")
             
             // Write-through cache (bounded + TTL + LRU).
             await usersCache.write(data, for: endpoint.cacheKey)
@@ -49,11 +49,11 @@ final class APIService {
             // Offline fallback: try cache if network/decoding fails.
             if let cached = await usersCache.read(for: endpoint.cacheKey),
                let decoded = try? JSONDecoder().decode(RandomUserResponse.self, from: cached) {
-                print("📦 Offline cache hit for page \(decoded.info.page)")
+                AppLogger.log("📦 Offline cache hit for page \(decoded.info.page)")
                 return decoded
             }
             
-            print("❌ Network/Decode error: \(error)")
+            AppLogger.log("❌ Network/Decode error: \(error)")
             if let networkError = error as? NetworkError {
                 throw networkError
             }

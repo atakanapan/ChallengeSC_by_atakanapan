@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 class AppCoordinator: Coordinator {
     var tabBarCoordinator: TabBarCoordinator!
 

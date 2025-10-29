@@ -2,5 +2,5 @@ import UIKit
 
 // MARK: - Coordinator Protocol
 protocol Coordinator: AnyObject {
-    func start()
+    @MainActor func start()
 }

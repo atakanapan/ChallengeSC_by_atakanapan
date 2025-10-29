@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 class MainTabBarController: UITabBarController {
     
     private var bookmarkBadgeObserver: NSObjectProtocol?
@@ -61,11 +62,13 @@ class MainTabBarController: UITabBarController {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.updateBookmarkBadge()
+            Task { @MainActor in
+                self?.updateBookmarkBadge()
+            }
         }
     }
     
-    private func updateBookmarkBadge() {
+    @MainActor private func updateBookmarkBadge() {
         let bookmarkCount = BookmarkManager.shared.bookmarkedCount
         let bookmarkTab = viewControllers?[1]
         

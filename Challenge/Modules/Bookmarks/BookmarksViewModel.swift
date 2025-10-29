@@ -5,13 +5,14 @@ protocol BookmarksViewModelDelegate: AnyObject {
     func didReceiveError(_ message: String)
 }
 
-class BookmarksViewModel {
+@MainActor
+final class BookmarksViewModel {
     
     // MARK: - Properties
     weak var delegate: BookmarksViewModelDelegate?
     
     private(set) var bookmarkedUsers: [UserEntity] = []
-    private let bookmarkManager = BookmarkManager.shared
+    private let bookmarkManager: BookmarkManager
     
     // MARK: - Computed Properties
     
@@ -31,7 +32,8 @@ class BookmarksViewModel {
     }
     
     // MARK: - Initialization
-    init() {
+    init(bookmarkManager: BookmarkManager? = nil) {
+        self.bookmarkManager = bookmarkManager ?? BookmarkManager.shared
         loadBookmarks()
     }
     
@@ -53,7 +55,7 @@ class BookmarksViewModel {
     func removeBookmark(at index: Int) {
         guard let user = user(at: index) else { return }
         bookmarkManager.removeBookmark(user)
-        // Note: bookmarks will be updated automatically via notification
+        // Note: bookmarks will be refreshed via notification or caller can call loadBookmarks()
     }
     
     /// Toggle bookmark for user at index
@@ -71,7 +73,7 @@ class BookmarksViewModel {
     /// Clear all bookmarks
     func clearAllBookmarks() {
         bookmarkManager.clearAllBookmarks()
-        // Note: bookmarks will be updated automatically via notification
+        // Note: bookmarks will be refreshed via notification or caller can call loadBookmarks()
     }
     
     /// Get confirmation message for removing specific bookmark

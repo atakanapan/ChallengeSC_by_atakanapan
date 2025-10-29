@@ -1,5 +1,6 @@
 import UIKit
 
+@MainActor
 class UsersListCoordinator: Coordinator {
     var navigationController: UINavigationController
     private var userDetailCoordinator: UserDetailCoordinator?

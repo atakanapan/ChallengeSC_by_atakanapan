@@ -44,6 +44,7 @@ class ImageLoadingService {
     
     private init() {
         let config = URLSessionConfiguration.default
+        config.waitsForConnectivity = true
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
         let session = URLSession(configuration: config)
