@@ -1,14 +1,14 @@
 import UIKit
 
 protocol UserTableViewCellDelegate: AnyObject {
-    func didTapBookmark(for user: User)
+    func didTapBookmark(for user: UserEntity)
 }
 
 class UserTableViewCell: UITableViewCell {
     static let identifier = "UserTableViewCell"
     
     weak var delegate: UserTableViewCellDelegate?
-    private var user: User?
+    private var user: UserEntity?
     
     // MARK: - UI Elements
     private let avatarImageView: UIImageView = {
@@ -119,7 +119,7 @@ class UserTableViewCell: UITableViewCell {
     }
     
     // MARK: - Configuration
-    func configure(with user: User) {
+    func configure(with user: UserEntity) {
         self.user = user
         
         nameLabel.text = user.fullName

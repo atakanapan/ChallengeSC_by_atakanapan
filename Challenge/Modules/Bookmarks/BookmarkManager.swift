@@ -15,21 +15,21 @@ class BookmarkManager {
     // MARK: - Public Methods
     
     /// Get all bookmarked users
-    var bookmarkedUsers: [User] {
+    var bookmarkedUsers: [UserEntity] {
         guard let data = userDefaults.data(forKey: bookmarksKey),
-              let users = try? JSONDecoder().decode([User].self, from: data) else {
+              let users = try? JSONDecoder().decode([UserEntity].self, from: data) else {
             return []
         }
         return users
     }
     
     /// Check if a user is bookmarked
-    func isBookmarked(_ user: User) -> Bool {
+    func isBookmarked(_ user: UserEntity) -> Bool {
         return bookmarkedUsers.contains(where: { $0.uniqueID == user.uniqueID })
     }
     
     /// Add a user to bookmarks
-    func addBookmark(_ user: User) {
+    func addBookmark(_ user: UserEntity) {
         var currentBookmarks = bookmarkedUsers
         
         // Avoid duplicates
@@ -47,7 +47,7 @@ class BookmarkManager {
     }
     
     /// Remove a user from bookmarks
-    func removeBookmark(_ user: User) {
+    func removeBookmark(_ user: UserEntity) {
         var currentBookmarks = bookmarkedUsers
         currentBookmarks.removeAll { $0.uniqueID == user.uniqueID }
         saveBookmarks(currentBookmarks)
@@ -61,7 +61,7 @@ class BookmarkManager {
     }
     
     /// Toggle bookmark status for a user
-    func toggleBookmark(_ user: User) {
+    func toggleBookmark(_ user: UserEntity) {
         if isBookmarked(user) {
             removeBookmark(user)
         } else {
@@ -88,7 +88,7 @@ class BookmarkManager {
     
     // MARK: - Private Methods
     
-    private func saveBookmarks(_ users: [User]) {
+    private func saveBookmarks(_ users: [UserEntity]) {
         do {
             let data = try JSONEncoder().encode(users)
             userDefaults.set(data, forKey: bookmarksKey)

@@ -11,12 +11,12 @@ class UserDetailViewModel {
     // MARK: - Properties
     weak var delegate: UserDetailViewModelDelegate?
     
-    private(set) var user: User
+    private(set) var user: UserEntity
     private let imageLoadingService = ImageLoadingService.shared
     private let bookmarkManager = BookmarkManager.shared
     
     // MARK: - Initialization
-    init(user: User) {
+    init(user: UserEntity) {
         self.user = user
         setupNotifications()
     }
@@ -130,7 +130,7 @@ class UserDetailViewModel {
     @objc private func bookmarkDidChange(_ notification: Notification) {
         // Check if the notification is for this specific user
         if let userInfo = notification.userInfo,
-           let notificationUser = userInfo["user"] as? User,
+           let notificationUser = userInfo["user"] as? UserEntity,
            notificationUser.uniqueID == user.uniqueID {
             delegate?.didUpdateBookmarkStatus()
         } else if notification.userInfo?["action"] as? String == "cleared" {

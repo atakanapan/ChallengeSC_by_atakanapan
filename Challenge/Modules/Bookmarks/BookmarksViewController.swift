@@ -195,7 +195,7 @@ class BookmarksViewController: UIViewController {
     }
     
     // MARK: - Navigation
-    private func showUserDetail(for user: User) {
+    private func showUserDetail(for user: UserEntity) {
         coordinator?.showUserDetail(for: user)
     }
     
@@ -239,7 +239,7 @@ extension BookmarksViewController: UITableViewDelegate {
 
 // MARK: - UserTableViewCellDelegate
 extension BookmarksViewController: UserTableViewCellDelegate {
-    func didTapBookmark(for user: User) {
+    func didTapBookmark(for user: UserEntity) {
         if let index = viewModel.bookmarkedUsers.firstIndex(of: user) {
             viewModel.toggleBookmark(at: index)
         }

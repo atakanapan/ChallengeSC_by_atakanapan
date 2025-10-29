@@ -8,9 +8,9 @@ class UserDetailCoordinator: Coordinator {
     weak var delegate: UserDetailCoordinatorDelegate?
     var navigationController: UINavigationController
     
-    private let user: User
+    private let user: UserEntity
     
-    init(navigationController: UINavigationController, user: User) {
+    init(navigationController: UINavigationController, user: UserEntity) {
         self.navigationController = navigationController
         self.user = user
     }

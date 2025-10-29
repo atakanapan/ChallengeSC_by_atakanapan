@@ -13,8 +13,8 @@ class UsersListViewModel {
     // MARK: - Properties
     weak var delegate: UsersListViewModelDelegate?
     
-    private(set) var users: [User] = []
-    private(set) var filteredUsers: [User] = []
+    private(set) var users: [UserEntity] = []
+    private(set) var filteredUsers: [UserEntity] = []
     private(set) var isSearching = false
     private(set) var isLoading = false
     private(set) var hasMoreData = true
@@ -26,7 +26,7 @@ class UsersListViewModel {
     private let apiService = APIService.shared
     
     // MARK: - Computed Properties
-    var currentUsers: [User] {
+    var currentUsers: [UserEntity] {
         return isSearching ? filteredUsers : users
     }
     
@@ -47,15 +47,18 @@ class UsersListViewModel {
         isLoading = true
         delegate?.didStartLoading()
         
-        apiService.fetchUsers(page: currentPage, seed: apiSeed) { [weak self] result in
+        Task { [weak self] in
             guard let self = self else { return }
             
-            self.isLoading = false
-            self.delegate?.didFinishLoading()
-            
-            switch result {
-            case .success(let response):
-                // Store seed for consistent pagination
+            do {
+                let response = try await self.apiService.fetchUsers(
+                    page: self.currentPage,
+                    results: 25,
+                    seed: self.apiSeed
+                )
+                
+                print("📥 ViewModel received \(response.results.count) users (page: \(self.currentPage))")
+                
                 if self.apiSeed == nil {
                     self.apiSeed = response.info.seed
                 }
@@ -67,22 +70,20 @@ class UsersListViewModel {
                 }
                 
                 self.currentPage += 1
+                self.hasMoreData = response.results.count >= 25
                 
-                // Check if we have more data
-                if response.results.count < 25 {
-                    self.hasMoreData = false
-                }
-                
-                // Update search results if currently searching
                 if self.isSearching {
                     self.performSearch(with: self.currentSearchText)
                 } else {
                     self.delegate?.didUpdateUsers()
                 }
                 
-            case .failure(let error):
+            } catch let error as NetworkError {
                 self.delegate?.didReceiveError(error)
             }
+            
+            self.isLoading = false
+            self.delegate?.didFinishLoading()
         }
     }
     
@@ -138,7 +139,7 @@ class UsersListViewModel {
     }
     
     /// Get user at specific index
-    func user(at index: Int) -> User? {
+    func user(at index: Int) -> UserEntity? {
         let dataSource = currentUsers
         guard index >= 0 && index < dataSource.count else { return nil }
         return dataSource[index]

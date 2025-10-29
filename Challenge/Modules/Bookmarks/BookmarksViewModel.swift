@@ -10,7 +10,7 @@ class BookmarksViewModel {
     // MARK: - Properties
     weak var delegate: BookmarksViewModelDelegate?
     
-    private(set) var bookmarkedUsers: [User] = []
+    private(set) var bookmarkedUsers: [UserEntity] = []
     private let bookmarkManager = BookmarkManager.shared
     
     // MARK: - Computed Properties
@@ -44,7 +44,7 @@ class BookmarksViewModel {
     }
     
     /// Get user at specific index
-    func user(at index: Int) -> User? {
+    func user(at index: Int) -> UserEntity? {
         guard index >= 0 && index < bookmarkedUsers.count else { return nil }
         return bookmarkedUsers[index]
     }

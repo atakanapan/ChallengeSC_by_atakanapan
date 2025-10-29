@@ -18,7 +18,7 @@ class BookmarksCoordinator: Coordinator {
         navigationController.pushViewController(bookmarksVC, animated: false)
     }
     
-    func showUserDetail(for user: User) {
+    func showUserDetail(for user: UserEntity) {
         userDetailCoordinator = UserDetailCoordinator(
             navigationController: navigationController,
             user: user

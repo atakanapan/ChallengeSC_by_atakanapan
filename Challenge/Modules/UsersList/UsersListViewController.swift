@@ -6,6 +6,10 @@ class UsersListViewController: UIViewController {
     weak var coordinator: UsersListCoordinator?
     private var viewModel = UsersListViewModel()
     
+    // MARK: - Diffable
+    private typealias Section = Int
+    private var dataSource: UITableViewDiffableDataSource<Section, UserEntity>?
+    
     // MARK: - UI Elements
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -119,10 +123,24 @@ class UsersListViewController: UIViewController {
     
     private func setupTableView() {
         tableView.delegate = self
-        tableView.dataSource = self
         tableView.register(UserTableViewCell.self, forCellReuseIdentifier: UserTableViewCell.identifier)
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 80
+
+        dataSource = UITableViewDiffableDataSource<Section, UserEntity>(tableView: tableView) { [weak self] tableView, indexPath, user in
+            guard let cell = tableView.dequeueReusableCell(
+                withIdentifier: UserTableViewCell.identifier,
+                for: indexPath
+            ) as? UserTableViewCell else {
+                return UITableViewCell()
+            }
+            
+            guard let self = self else { return cell }
+            
+            cell.configure(with: user)
+            cell.delegate = self
+            return cell
+        }
     }
     
     private func setupSearchController() {
@@ -161,11 +179,12 @@ class UsersListViewController: UIViewController {
     }
     
     private func updateVisibleCells() {
+        guard let dataSource = dataSource else { return }
         for cell in tableView.visibleCells {
             guard let userCell = cell as? UserTableViewCell,
-                  let indexPath = tableView.indexPath(for: cell),
-                  let user = viewModel.user(at: indexPath.row) else { continue }
-            
+                  let indexPath = tableView.indexPath(for: userCell),
+                  let user = dataSource.itemIdentifier(for: indexPath)
+            else { continue }
             userCell.configure(with: user)
         }
     }
@@ -173,9 +192,12 @@ class UsersListViewController: UIViewController {
     // MARK: - UI Updates
     private func updateUI() {
         DispatchQueue.main.async {
-            self.tableView.reloadData()
+            var snapshot = NSDiffableDataSourceSnapshot<Section, UserEntity>()
+            snapshot.appendSections([0])
+            snapshot.appendItems(self.viewModel.currentUsers, toSection: 0)
+            self.dataSource?.apply(snapshot, animatingDifferences: true)
+
             self.emptyStateView.isHidden = !self.viewModel.isEmpty
-            
             let emptyState = self.viewModel.getEmptyStateMessage()
             self.emptyStateLabel.text = emptyState.title
             self.emptyStateSubLabel.text = emptyState.subtitle
@@ -183,28 +205,8 @@ class UsersListViewController: UIViewController {
     }
     
     // MARK: - Navigation
-    private func showUserDetail(for user: User) {
+    private func showUserDetail(for user: UserEntity) {
         coordinator?.showUserDetail(for: user)
-    }
-}
-
-// MARK: - UITableViewDataSource
-extension UsersListViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.userCount
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: UserTableViewCell.identifier, for: indexPath) as? UserTableViewCell else {
-            return UITableViewCell()
-        }
-        
-        if let user = viewModel.user(at: indexPath.row) {
-            cell.configure(with: user)
-            cell.delegate = self
-        }
-        
-        return cell
     }
 }
 
@@ -234,7 +236,7 @@ extension UsersListViewController: UISearchResultsUpdating {
 
 // MARK: - UserTableViewCellDelegate
 extension UsersListViewController: UserTableViewCellDelegate {
-    func didTapBookmark(for user: User) {
+    func didTapBookmark(for user: UserEntity) {
         if let index = viewModel.currentUsers.firstIndex(of: user) {
             viewModel.toggleBookmark(at: index)
         }
