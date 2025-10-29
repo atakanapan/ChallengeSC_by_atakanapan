@@ -6,7 +6,7 @@ import SwiftData
 final class BookmarkManager {
 
     // MARK: - Singleton
-    static let shared = BookmarkManager(modelContext: PersistenceController.shared.context)
+    static let shared = BookmarkManager(modelContext: BookmarksPersistenceController.shared.context)
 
     // MARK: - Notifications
     static let bookmarkDidChangeNotification = NSNotification.Name("BookmarkDidChange")

@@ -1,8 +1,8 @@
 import Foundation
 import SwiftData
 
-final class PersistenceController {
-    static let shared = PersistenceController()
+final class BookmarksPersistenceController {
+    static let shared = BookmarksPersistenceController()
 
     let container: ModelContainer
     let context: ModelContext
